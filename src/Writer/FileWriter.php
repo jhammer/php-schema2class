@@ -13,7 +13,7 @@ class FileWriter implements WriterInterface
         $this->output = $output;
     }
 
-    public function writeFile(string $filename, string $contents): void
+    public function writeFile(string $filename, string $contents, bool $overwrite): void
     {
         $dirname = dirname($filename);
 
@@ -25,7 +25,9 @@ class FileWriter implements WriterInterface
         $len = strlen($contents);
         $this->output->writeln("writing <info>$len</info> bytes to <comment>$filename</comment>");
 
-        file_put_contents($filename, $contents);
+        if ($overwrite || !file_exists($filename)) {
+            file_put_contents($filename, $contents);
+        }
     }
 
 }

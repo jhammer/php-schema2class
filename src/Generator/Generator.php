@@ -41,7 +41,7 @@ class Generator
             $prop       = new PropertyGenerator(
                 $property->key(),
                 isset($schema["default"]) ? $schema["default"] : null,
-                PropertyGenerator::FLAG_PRIVATE
+                PropertyGenerator::FLAG_PROTECTED
             );
 
             if ($property instanceof OptionalPropertyDecorator) {

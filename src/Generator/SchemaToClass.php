@@ -75,21 +75,54 @@ class SchemaToClass
         $methods[] = $codeGenerator->generateValidateMethod();
         $methods[] = $codeGenerator->generateCloneMethod($propertiesFromSchema);
 
+        $this->writeClass(
+            $req->getTargetNamespace() . '\Machine', 
+            '_' . $req->getTargetClass(),
+            null, 
+            $properties, 
+            $methods,
+            $req->getTargetDirectory() . '/Machine',
+            $req->isAtLeastPHP("7.0") && !$req->getOptions()->getDisableStrictTypes(),
+            true
+        );
+        $this->writeClass(
+            $req->getTargetNamespace(), 
+            $req->getTargetClass(), 
+            $req->getTargetNamespace() . '\Machine\_' . $req->getTargetClass(),
+            [], 
+            [],
+            $req->getTargetDirectory(),
+            $req->isAtLeastPHP("7.0") && !$req->getOptions()->getDisableStrictTypes(),
+            false
+        );
+    }
+
+    private function writeClass(
+        string $namespace, 
+        string $className, 
+        ?string $extends, 
+        array $properties, 
+        array $methods, 
+        string $directory, 
+        bool $strict, 
+        bool $overwrite
+    ): void
+    {
         $cls = new ClassGenerator(
-            $req->getTargetClass(),
-            $req->getTargetNamespace(),
+            $className,
+            $namespace,
             null,
-            null,
+            $extends,
             [],
             $properties,
             $methods,
             null
         );
-
+        
         $file = new FileGenerator();
         $file->setClasses([$cls]);
 
-        if ($req->isAtLeastPHP("7.0") && !$req->getOptions()->getDisableStrictTypes()) {
+        if ($strict) {
             $file->setDeclares([DeclareStatement::strictTypes(1)]);
         }
 
@@ -97,9 +130,8 @@ class SchemaToClass
 
         // Do some corrections because the Zend code generation library is stupid.
         $content = preg_replace('/ : \\\\self/', ' : self', $content);
-        $content = preg_replace('/\\\\'.preg_quote($req->getTargetNamespace()).'\\\\/', '', $content);
+        $content = preg_replace('/\\\\'.preg_quote($namespace).'\\\\/', '', $content);
 
-        $this->writer->writeFile($req->getTargetDirectory() . '/' . $req->getTargetClass() . '.php', $content);
+        $this->writer->writeFile($directory . '/' . $className . '.php', $content, $overwrite);
     }
-
 }

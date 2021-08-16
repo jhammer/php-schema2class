@@ -14,7 +14,7 @@ class DebugWriter implements WriterInterface
         $this->output = $output;
     }
 
-    public function writeFile(string $filename, string $contents): void
+    public function writeFile(string $filename, string $contents, bool $overwrite): void
     {
         $this->output->writeln("writing to <comment>$filename</comment>:");
         $this->output->writeln($contents);
